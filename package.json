@@ -1,0 +1,23 @@
+{
+  "name": "confetti_cuisine",
+  "version": "1.0.0",
+  "description": "A site for booking classes for cooking.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hrishiakhade/confetti-cusine-mean-stack.git"
+  },
+  "author": "Hrushikesh Akhade",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hrishiakhade/confetti-cusine-mean-stack/issues"
+  },
+  "homepage": "https://github.com/hrishiakhade/confetti-cusine-mean-stack#readme",
+  "dependencies": {
+    "cities": "^2.0.0",
+    "http-status-codes": "^2.2.0"
+  }
+}
