@@ -1,60 +1,76 @@
-const port = 3000,
-    http = require("http"),
-    httpStatus = require("http-status-codes"),
-    router = require("./router"),
-    contentTypes = require("./contentTypes"),
-    utils = require("./utils");
+"use strict";
 
+const express = require("express"),
+  layouts = require("express-ejs-layouts"),
+  app = express(),
+  router = require("./routes/index"),
+  homeController = require("./controllers/homeController"),
+  errorController = require("./controllers/errorController"),
+  subscribersController = require("./controllers/subscribersController.js"),
+  usersController = require("./controllers/usersController.js"),
+  coursesController = require("./controllers/coursesController.js"),
+  mongoose = require("mongoose"),
+  methodOverride = require("method-override"),
+  passport = require("passport"),
+  cookieParser = require("cookie-parser"),
+  expressSession = require("express-session"),
+  expressValidator = require("express-validator"),
+  connectFlash = require("connect-flash"),
+  User = require("./models/user");
 
-router.get("/", (req, res) => {
-    res.writeHead(httpStatus.OK, contentTypes.htm);
-    utils.getFile("views/index.html", res);
+mongoose.connect(
+  "mongodb://localhost:27017/confetti_cuisine",
+  { useNewUrlParser: true }
+);
+mongoose.set("useCreateIndex", true);
+
+app.set("port", process.env.PORT || 61130);
+app.set("view engine", "ejs");
+
+app.use(
+  methodOverride("_method", {
+    methods: ["POST", "GET"]
+  })
+);
+
+app.use(layouts);
+app.use(express.static("public"));
+app.use(expressValidator());
+app.use(
+  express.urlencoded({
+    extended: false
+  })
+);
+app.use(express.json());
+
+app.use(cookieParser("secretCuisine123"));
+app.use(
+  expressSession({
+    secret: "secretCuisine123",
+    cookie: {
+      maxAge: 4000000
+    },
+    resave: false,
+    saveUninitialized: false
+  })
+);
+app.use(connectFlash());
+
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(User.createStrategy());
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+app.use((req, res, next) => {
+  res.locals.loggedIn = req.isAuthenticated();
+  res.locals.currentUser = req.user;
+  res.locals.flashMessages = req.flash();
+  next();
 });
 
-router.get("/courses.html", (req, res) => {
-    res.writeHead(httpStatus.OK, contentTypes.html);
-    utils.getFile("views/courses.html", res);
-});
+app.use("/", router);
 
-router.get("/contact.html", (req, res) => {
-    res.writeHead(httpStatus.OK, contentTypes.html);
-    utils.getFile("views/contact.html", res);
+app.listen(app.get("port"), () => {
+  console.log(`Server running at http://localhost:${app.get("port")}`);
 });
-
-router.post("/", (req, res) => {
-    res.writeHead(httpStatus.OK, contentTypes.html);
-    utils.getFile("views/thanks.html", res);
-});
-
-router.get("/graph.png", (req, res) => {
-    res.writeHead(httpStatus.OK, contentTypes.png);
-    utils.getFile("public/images/graph.png", res);
-});
-
-router.get("/people.jpg", (req, res) => {
-    res.writeHead(httpStatus.OK, contentTypes.jpg);
-    utils.getFile("public/images/people.jpg", res);
-});
-
-router.get("/product.jpg", (req, res) => {
-    res.writeHead(httpStatus.OK, contentTypes.jpg);
-    utils.getFile("public/images/product.jpg", res);
-});
-
-router.get("/confetti_cuisine.css", (req, res) => {
-    res.writeHead(httpStatus.OK, contentTypes.css);
-    utils.getFile("public/css/confetti_cuisine.css", res);
-});
-
-router.get("/bootstrap.css", (req, res) => {
-    res.writeHead(httpStatus.OK, contentTypes.css);
-    utils.getFile("public/css/bootstrap.css", res);
-});
-
-router.get("/confetti_cuisine.js", (req, res) => {
-    res.writeHead(httpStatus.OK, contentTypes.js);
-    utils.getFile("public/js/confetti_cuisine.js", res);
-});
-
-http.createServer(router.handle).listen(port);
-console.log(`The server is listening on port number: ${port}`);
