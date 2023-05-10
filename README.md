@@ -1,1 +1,0 @@
-# confetti-cusine-mean-stack
